@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "work_request": "BASELINE-001",
+  "status": "verified",
+  "summary": "Initialized the customer-neutral three-tier Hello World baseline without implementing DEMO-101.",
+  "generated_at": "2026-07-22T18:40:44Z",
+  "source_revision": "uncommitted-worktree",
+  "approvals": [
+    {
+      "checkpoint": "initialization-scope",
+      "status": "approved",
+      "evidence": "Direct user request to initialize the repository."
+    }
+  ],
+  "changed_files": [
+    "api/app/__init__.py",
+    "api/app/database.py",
+    "api/app/main.py",
+    "api/app/models.py",
+    "compose.yaml",
+    "db/.dockerignore",
+    "db/Dockerfile",
+    "db/init.sql",
+    "web/.dockerignore",
+    "web/Dockerfile",
+    "web/app.js",
+    "web/index.html",
+    "web/nginx.conf",
+    "web/styles.css"
+  ],
+  "verification": [
+    {
+      "name": "api-tests",
+      "command": "PYTHONPATH=api pytest api/tests",
+      "status": "passed"
+    },
+    {
+      "name": "compose-smoke",
+      "command": "docker compose up --detach --build --wait; smoke Nginx on temporary host port 18080 because unrelated local port 8080 was occupied",
+      "status": "passed"
+    }
+  ],
+  "security_checks": [
+    {
+      "name": "bandit",
+      "command": "bandit --recursive api/app",
+      "status": "passed"
+    },
+    {
+      "name": "pip-audit",
+      "command": "pip-audit --requirement api/requirements.txt",
+      "status": "passed"
+    }
+  ]
+}
