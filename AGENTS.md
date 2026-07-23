@@ -27,9 +27,15 @@ For every request:
 
 For material application, infrastructure, or delivery-process changes,
 `governed-sdlc` is mandatory. The pinned compatibility line is semantic version
-`0.1.0`; installed build metadata such as `0.1.0+codex.<build>` is compatible
+`0.2.0`; installed build metadata such as `0.2.0+codex.<build>` is compatible
 with that line. A different semantic version requires an explicit
 compatibility review.
+
+For a request to implement or resume a GitHub Issue, the required entry skill
+is `governed-sdlc-issue-to-review`. Confirm that the pinned plugin version and
+that skill are active before proceeding. If either is unavailable, stop and
+report the installation gap; do not recreate the missing orchestrator from
+these repository instructions.
 
 ## Key workflow routing
 
@@ -61,19 +67,69 @@ Workspace Agents support an applicable workflow; they do not replace its
 primary delivery plugin. Use them only when the user or selected plugin
 authorizes the corresponding source access or external action.
 
+For the Issue-to-review workflow, GitHub and Google Drive are required source
+connectors. Sites and Workspace Agents are optional presentation and
+coordination surfaces and may be used only when explicitly requested. They are
+never systems of record or approval authorities.
+
+## Canonical GitHub Issue workflow
+
+When a user asks to implement, start, take end to end, or resume a GitHub Issue,
+select `governed-sdlc-issue-to-review` and let its current skill instructions
+drive the work. The user does not need to enumerate every phase or plugin.
+
+Use this source model:
+
+- GitHub Issue discussion records the work request, scope, durable stage
+  references, and accountable decisions.
+- Linked, current Google Drive material supplies product, UX, architecture,
+  policy, and durable collaboration context.
+- The repository, branch or worktree, commits, tests, pull request, and CI
+  contain implementation truth.
+- The Codex task plan tracks in-session progress but is not the durable system
+  of record.
+
+The required governed states are:
+
+```text
+CONTEXT
+→ PLAN_DRAFT → PLAN_APPROVED
+→ DESIGN_DRAFT → DESIGN_APPROVED
+→ BUILD
+→ VERIFY
+→ PR_REVIEW → REVIEW_APPROVED
+```
+
+Only an accountable human can approve the current Plan, current Design, or
+current pull-request revision. A label, green check, generated artifact, Site,
+Workspace Agent, specialist result, or agent statement is evidence, not
+approval. Material changes return work to the earliest affected stage and make
+downstream approvals and evidence stale.
+
+After `REVIEW_APPROVED`, merge, packaging, release, deployment, evidence
+publication, measurement, and improvement are separately authorized
+continuations. An implementation request does not itself authorize Issue or
+Drive writes, commits, pushes, pull-request creation, merge, release,
+deployment, or external communication.
+
 ## Multi-plugin sequencing
 
-When several plugins apply, order work by evidence dependency:
+When several plugins apply, use them as extensions around the governed
+Issue-to-review stages:
 
-1. Shape the outcome and acceptance criteria with `product-owner`.
+1. Use `product-owner` to shape the outcome, Issue quality, and acceptance
+   criteria before or during Context and Plan.
 2. Resolve relevant UX, architecture, and security questions with `ux-design`,
-   `enterprise-architecture`, and `security-assurance`.
-3. Use `governed-sdlc` for bounded intake, planning, approved implementation,
-   repository verification, and evidence assembly.
-4. Use `test-engineering` for risk-based test design and execution.
+   `enterprise-architecture`, and `security-assurance` during Plan or Design.
+3. Keep `governed-sdlc-issue-to-review` as the owner of stage transitions,
+   stale-state handling, and the three human gates.
+4. Use `test-engineering` for deeper risk-based strategy and execution during
+   Verify.
 5. Use `quality-assurance` for an independent, revision-aligned readiness
-   assessment.
-6. Use `package-supply-chain` for artifact and provenance evidence.
+   recommendation during pull-request Review; it does not approve the pull
+   request.
+6. After `REVIEW_APPROVED`, use `package-supply-chain` for artifact identity
+   and provenance evidence.
 7. Use `ship-release`, `devops-platform`, and `site-reliability` for the
    separately authorized release plan, deployment/platform action, and
    production-readiness assessment.
@@ -86,28 +142,33 @@ release authority into one claimed approval.
 
 ## Required governed workflow for material changes
 
-1. Begin with an approved work request under
-   `delivery/<work-request-id>/`. Treat it as the scope and
-   acceptance-criteria source.
-2. Use the applicable `governed-sdlc` intake or planning skill and create
-   `delivery/<work-request-id>/plan.md` before editing application,
-   infrastructure, or delivery-process code or configuration.
-3. Create `delivery/<work-request-id>/adr.md` for material design or operating
-   model decisions. Keep a proposed ADR proposed until an authorized decider
-   explicitly accepts it.
-4. Stop at every explicit human-approval checkpoint required by any selected
+1. For GitHub Issue-led work, use `governed-sdlc-issue-to-review` and the Issue
+   as the durable workflow spine.
+2. For an explicit repository-local request with no GitHub Issue, begin from
+   the approved request under `delivery/<work-request-id>/`, use the applicable
+   standalone `governed-sdlc` skills, and record why the Issue-led path does not
+   apply.
+3. Create the applicable Plan before editing application, infrastructure, or
+   delivery-process code or configuration. For Issue-led work, stop for
+   explicit approval of the current Plan before Design.
+4. Create the applicable Design record or
+   `delivery/<work-request-id>/adr.md` for material design or operating-model
+   decisions. For Issue-led work, stop for explicit approval of the current
+   Design before Build. Keep a proposed ADR proposed until an authorized
+   decider explicitly accepts it.
+5. Stop at every explicit human-approval checkpoint required by any selected
    plugin or work request. Never fabricate, infer, or backfill an approval.
-5. Implement only the approved scope and validate every affected tier and
+6. Implement only the approved scope and validate every affected tier and
    concern.
-6. Run the relevant static, unit, API, integration, Compose, security,
+7. Run the relevant static, unit, API, integration, Compose, security,
    compatibility, recovery, and smoke checks identified by the plan and
    selected specialist plugins.
-7. Record reproducible results in
+8. Record reproducible results in
    `delivery/<work-request-id>/verification.md`.
-8. Create
+9. Create
    `delivery/<work-request-id>/release-evidence.json` and validate it with
    `scripts/check_delivery_evidence.py`.
-9. Stop before commit, push, pull request, merge, deployment, publication,
+10. Stop before commit, push, pull request, merge, deployment, publication,
    tagging, or release unless the user explicitly authorizes that action and
    all applicable controls permit it.
 
